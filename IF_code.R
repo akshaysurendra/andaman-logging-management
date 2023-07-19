@@ -1,30 +1,6 @@
-#### IF - happening this time - July 2023 ####
-
-# fig1 - a) map of study sites from aerial view (as in FEM), b) regen plots in Bakultala
-# fig2 - large tree: density & richness
-# fig3 - Rank-abundance curves with names of species, one inset for each logging treatment
-# fig4 - regeneration: density, richness
-
-
-
-## cancelled:
-# AGB plot
-# no of stumps
-#d.stm <- read_csv(file = "data/plotdata.csv") %>% filter(code=="stump")
-# dat1 <- d.stm %>% group_by(forest_type,treatment,plot_ID)%>% summarise(nstump = n()) %>%
-#     right_join(x = .,y = d.lar %>% select(treatment,forest_type,plot_ID) %>% distinct())
-# comparisons_fig1 <- list( c("TL", "OL_far"), c("TL", "OL_near"), c("OL_far", "OL_near"))
-# fig1 <- ggplot(data = dat1 %>% filter(treatment!="baseline"), aes(y=nstump,x=treatment)) +
-#   geom_violin(aes(fill=forest_type)) + geom_jitter(width = 0.03) + facet_grid(.~forest_type) + theme_bw() +
-#   stat_compare_means(comparisons = comparisons_fig1,method = "t.test",paired = F,label = "p.signif") +
-#   scale_fill_manual(name ="",values = c("grey90","grey60")) + scale_x_discrete(labels=c("once (~25 yrs ago)",
-#                             "once (~7 yrs ago)", "twice (~7 & ~25 yrs ago)")) + guides(fill=F) + xlab(NULL) +
-#   ylab("Number of logging stumps (per 0.49ha)") +  coord_flip()
-# ggsave(plot = fig1,filename = "figure2.png",device = "png",width = 20,height = 7,units = "cm",dpi = 300)
-
+#### July 2023 ####
 
 ### Prep
-setwd("C:/Users/aksha/Desktop/IF/")
 library(tidyverse)
 library(readxl)
 library(vegan)
@@ -33,16 +9,18 @@ library(ggrepel)
 library(sf)
 library(OpenImageR)
 
-### Figure 1: Map etc. (PPT)
+### Figure 1: Map etc. (PPT) / see
 
 ### Figure 2: Large tree density and diversity ~ logging-treatment, forest-type #####
 
-d.lar <- read_csv(file = "data/plotdata.csv") %>%
+d.lar <- read_csv(file = "andaman-logging-management/plotdata.csv") %>%
   mutate(gbh_cm = ifelse(is.na(gbh_cm),0,gbh_cm),
          gbh_cm_stem2 = ifelse(is.na(gbh_cm_stem2),0,gbh_cm_stem2),
          gbh_cm_stem3 = ifelse(is.na(gbh_cm_stem3),0,gbh_cm_stem3)) %>%
   mutate(gbheff = sqrt(gbh_cm^2 + gbh_cm_stem2^2 + gbh_cm_stem3^2)) %>%
   filter(gbheff >=180)
+
+write_csv
 
 dat2.tmp <- data.frame()
 for(i in 1:n_distinct(d.lar$plot_ID))
