@@ -33,36 +33,33 @@ comparisons_fig2 <- list( c("TL", "OL_far"), #c("TL", "OL_near"),
                           c("baseline", "OL_near"),
                           c("baseline", "OL_far"),c("baseline", "TL"))
 
+commongg_fig2 <- list(
+  stat_compare_means(comparisons = comparisons_fig2,method = "t.test",
+                          paired = F,label = "p.signif", size = 3.5),
+  scale_fill_manual(name ="",values = c("grey90","grey60")),
+  scale_x_discrete(labels=c("unlogged"," old policy (1990s)","new policy (2007-14)",
+                            "old & new policy (2007-14 & 1990s)")),
+  theme_bw(),guides(fill=F),xlab(""),
+  theme(text = element_text(size=12)),coord_flip())
+
 fig2 <-
   plot_grid(
-  ggplot(data = dat2,aes(y=instem,x=treatment)) +
-  geom_violin(aes(fill=forest_type)) +
-  geom_jitter(width = 0.03) +
-  facet_grid(.~forest_type) + theme_bw() +
-  stat_compare_means(comparisons = comparisons_fig2,method = "t.test",
-                     paired = F,label = "p.signif") +
-  scale_fill_manual(name ="",values = c("grey90","grey60")) +
-  scale_x_discrete(labels=c("unlogged",
-                            "once (~25 yrs ago)",
-                            "once (~7 yrs ago)",
-                            "twice (~7 & ~25 yrs ago)")) +
-  guides(fill=F)+ xlab("") + ylab("Tree density (gbh>=180cm in 0.49ha)") + coord_flip(),
+  ggplot(data = dat2,
+         aes(y=instem,x=treatment)) +
+    geom_violin(aes(fill=forest_type)) +
+    geom_jitter(width = 0.03,size=0.8) + facet_wrap(.~forest_type,nrow = 2) +
+    ylab("Tree density (trees/0.49ha)") + commongg_fig2,
 
-  ggplot(data = dat2,aes(y=insp,x=treatment)) +
-  geom_violin(aes(fill=forest_type)) +
-  geom_jitter(width = 0.03) +
-  facet_grid(.~forest_type) + theme_bw() +
-  stat_compare_means(comparisons = comparisons_fig2,method = "t.test",
-                     paired = F,label = "p.signif") +
-  scale_fill_manual(name ="",values = c("grey90","grey60")) +
-    scale_x_discrete(labels=c("unlogged",
-                              "once (~25 yrs ago)",
-                              "once (~7 yrs ago)",
-                              "twice (~7 & ~25 yrs ago)")) +
-    guides(fill=F) + xlab("") + ylab("Species richness (gbh>=180cm in 0.49ha)") + coord_flip(),
-  nrow = 3)
+  ggplot(data = dat2,
+         aes(y=insp,x=treatment)) +
+    geom_violin(aes(fill=forest_type)) +
+    geom_jitter(width = 0.03,size=0.8) + facet_wrap(.~forest_type,nrow = 2) +
+    ylab("Species richness (species/0.49ha)") + commongg_fig2 +
+    theme(axis.text.y = element_blank()),
+  rel_widths = c(1.85,1),
+  ncol = 2)
 
-ggsave(plot = fig2,filename = "figure2.png",device = "png",width = 20,height =21,units = "cm",dpi = 300)
+ggsave(plot = fig2,filename = "figure2.png",device = "png",width = 20,height = 13,units = "cm",dpi = 300)
 
 ### Figure 3: Rank-abundance curves #####
 
@@ -111,33 +108,57 @@ d.rac_baseline.d <- d.lar %>% filter(treatment=="baseline",forest_type=="deciduo
   arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = nstem/1,
                              counter = row_number(), cstemperc = cstem/max(cstem))
 
-treatment.labs <- c("unlogged","once (~25 yrs ago)","once (~7 yrs ago)","twice (~7 & ~25 yrs ago)")
+treatment.labs <- c("unlogged","old policy (1990s)","new policy (2007-14)", "both (2007-14 & 1990s)")
 names(treatment.labs) <- c("baseline", "OL_far", "OL_near","TL")
 
-commongg <- list(geom_line(alpha = 0.4),
+commongg_fig3 <- list(geom_line(alpha = 0.4),
                  geom_point(alpha = 0.8), ylim(0,35),
                  facet_wrap(forest_type ~ treatment,nrow = 2,scales = "free_x",
                             labeller = labeller(treatment = treatment.labs)),
-                 ylab(""),xlab(""),theme_bw(),theme(axis.text.x = element_blank()),
+                 ylab(""),xlab(""),theme_bw(),
                  geom_text_repel(aes(label = ifelse(cstemperc <= 0.5,
-                                                    species_ID,"")),
-                                 size = 3.5,box.padding = 2,
-                                 min.segment.length = 0,
-                                 segment.colour = "gray80",max.overlaps = 20))
+                                                    species_ID,""),fontface = 'italic'),
+                                 size = 2.5,box.padding = 0.35,
+                                 min.segment.length = 0,nudge_y = 5,
+                                 segment.colour = "gray80",max.overlaps = Inf,
+                                 xlim = c(NA,NA),ylim = c(NA,NA)),
+                 theme(axis.text.x = element_blank(),
+                       text = element_text(size=11),
+                       panel.spacing = unit(0.1,"lines")),
+                 coord_cartesian(clip = "off"))
+
+specialgg_fig3_evergreenboth <- list(geom_line(alpha = 0.4),
+                      geom_point(alpha = 0.8), ylim(0,35),
+                      facet_wrap(forest_type ~ treatment,nrow = 2,scales = "free_x",
+                                 labeller = labeller(treatment = treatment.labs)),
+                      ylab(""),xlab(""),theme_bw(),
+                      geom_text_repel(aes(label = ifelse(cstemperc <= 0.5,
+                                                         species_ID,""),fontface = 'italic'),
+                                      size = 2.5,box.padding = 0.35,
+                                      min.segment.length = 0,nudge_y = 0,
+                                      segment.colour = "gray80",max.overlaps = Inf,
+                                      xlim = c(NA,NA),ylim = c(NA,NA)),
+                      theme(axis.text.x = element_blank(),
+                            text = element_text(size=11),
+                            panel.spacing = unit(0.1,"lines")),
+                      coord_cartesian(clip = "off"))
+
+
 
 fig3 <-
   plot_grid(
-    ggplot(data = d.rac_TL.d, aes(y = scaled_nstem,x=counter)) + commongg,
-    ggplot(data = d.rac_TL.e, aes(y = scaled_nstem,x=counter)) + commongg,
-    ggplot(data = d.rac_OLnear.d, aes(y = scaled_nstem,x=counter)) + commongg,
-    ggplot(data = d.rac_OLnear.e, aes(y = scaled_nstem,x=counter)) + commongg,
-    ggplot(data = d.rac_OLfar.d, aes(y = scaled_nstem,x=counter)) + commongg,
-    ggplot(data = d.rac_OLfar.e, aes(y = scaled_nstem,x=counter)) + commongg,
-    ggplot(data = d.rac_baseline.d, aes(y = scaled_nstem,x=counter)) + commongg,
-    ggplot(data = d.rac_baseline.e, aes(y = scaled_nstem,x=counter)) + commongg,
-    nrow = 4)
+    ggplot(data = d.rac_TL.d, aes(y = scaled_nstem,x=counter)) + commongg_fig3,
+    ggplot(data = d.rac_OLnear.d, aes(y = scaled_nstem,x=counter)) + commongg_fig3 + theme(axis.text.y = element_blank()),
+    ggplot(data = d.rac_OLfar.d, aes(y = scaled_nstem,x=counter)) + commongg_fig3 + theme(axis.text.y = element_blank()),
+    ggplot(data = d.rac_baseline.d, aes(y = scaled_nstem,x=counter)) + commongg_fig3 + theme(axis.text.y = element_blank()),
+    ggplot(data = d.rac_TL.e, aes(y = scaled_nstem,x=counter)) + specialgg_fig3_evergreenboth,
+    ggplot(data = d.rac_OLnear.e, aes(y = scaled_nstem,x=counter)) + commongg_fig3 + theme(axis.text.y = element_blank()),
+    ggplot(data = d.rac_OLfar.e, aes(y = scaled_nstem,x=counter)) + commongg_fig3 + theme(axis.text.y = element_blank()),
+    ggplot(data = d.rac_baseline.e, aes(y = scaled_nstem,x=counter)) + commongg_fig3 + theme(axis.text.y = element_blank()),greedy = TRUE,
 
-ggsave(plot = fig3,filename = "figure3.png",device = "png",width = 20,height = 28,units = "cm",dpi = 300)
+    nrow = 2)
+
+ggsave(plot = fig3,filename = "figure3.png",device = "png",width = 21,height = 12,units = "cm",dpi = 300)
 
 ### Figure 4: Regen ####
 d.nra <- read_xlsx(path = "nra_data.xlsx",sheet = 1)
