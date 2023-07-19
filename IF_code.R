@@ -3,24 +3,14 @@
 ### Prep
 library(tidyverse)
 library(readxl)
-library(vegan)
 library(ggpubr)
 library(ggrepel)
-library(sf)
-library(OpenImageR)
+library(cowplot)
 
-### Figure 1: Map etc. (PPT) / see
+### Figure 1: see PPT file
+### Figure 2: Large tree density& richness ~ logging-treatment, forest-type ####
 
-### Figure 2: Large tree density and diversity ~ logging-treatment, forest-type #####
-
-d.lar <- read_csv(file = "andaman-logging-management/plotdata.csv") %>%
-  mutate(gbh_cm = ifelse(is.na(gbh_cm),0,gbh_cm),
-         gbh_cm_stem2 = ifelse(is.na(gbh_cm_stem2),0,gbh_cm_stem2),
-         gbh_cm_stem3 = ifelse(is.na(gbh_cm_stem3),0,gbh_cm_stem3)) %>%
-  mutate(gbheff = sqrt(gbh_cm^2 + gbh_cm_stem2^2 + gbh_cm_stem3^2)) %>%
-  filter(gbheff >=180)
-
-write_csv
+d.lar <- read_csv(file = "plotdata_large.csv")
 
 dat2.tmp <- data.frame()
 for(i in 1:n_distinct(d.lar$plot_ID))
@@ -28,9 +18,9 @@ for(i in 1:n_distinct(d.lar$plot_ID))
   iplot <- d.lar %>% filter(plot_ID==sort(unique(d.lar$plot_ID))[i]) %>% filter(code!="stump")
   idat2 <-
     c(instem = nrow(iplot),
-      #iagb = sum(iplot$agb_Mg),
-      insp = n_distinct(iplot$code),
-      ieH = diversity(x = iplot %>% pull(code) %>% table(),index = "shannon") %>% exp())
+      # ieH = diversity(x = iplot %>% pull(code) %>% table(),index = "shannon") %>% exp(),
+      insp = n_distinct(iplot$code))
+
   dat2.tmp <- bind_rows(dat2.tmp,idat2)
 }
 
@@ -44,7 +34,7 @@ comparisons_fig2 <- list( c("TL", "OL_far"), #c("TL", "OL_near"),
                           c("baseline", "OL_far"),c("baseline", "TL"))
 
 fig2 <-
-  cowplot::plot_grid(
+  plot_grid(
   ggplot(data = dat2,aes(y=instem,x=treatment)) +
   geom_violin(aes(fill=forest_type)) +
   geom_jitter(width = 0.03) +
@@ -76,12 +66,7 @@ ggsave(plot = fig2,filename = "figure2.png",device = "png",width = 20,height =21
 
 ### Figure 3: Rank-abundance curves #####
 
-d.lar <- read_csv(file = "data/plotdata.csv") %>%
-  mutate(gbh_cm = ifelse(is.na(gbh_cm),0,gbh_cm),
-         gbh_cm_stem2 = ifelse(is.na(gbh_cm_stem2),0,gbh_cm_stem2),
-         gbh_cm_stem3 = ifelse(is.na(gbh_cm_stem3),0,gbh_cm_stem3)) %>%
-  mutate(gbheff = sqrt(gbh_cm^2 + gbh_cm_stem2^2 + gbh_cm_stem3^2)) %>%
-  filter(gbheff >=180)
+d.lar <- read_csv(file = "plotdata_large.csv")
 
 # d.lar %>% group_by(treatment,forest_type) %>% summarise(nplots = n_distinct(plot_ID))
 # scaled each rank-abundance # of plots to make relative abundances comparable
@@ -141,7 +126,7 @@ commongg <- list(geom_line(alpha = 0.4),
                                  segment.colour = "gray80",max.overlaps = 20))
 
 fig3 <-
-  cowplot::plot_grid(
+  plot_grid(
     ggplot(data = d.rac_TL.d, aes(y = scaled_nstem,x=counter)) + commongg,
     ggplot(data = d.rac_TL.e, aes(y = scaled_nstem,x=counter)) + commongg,
     ggplot(data = d.rac_OLnear.d, aes(y = scaled_nstem,x=counter)) + commongg,
@@ -155,7 +140,7 @@ fig3 <-
 ggsave(plot = fig3,filename = "figure3.png",device = "png",width = 20,height = 28,units = "cm",dpi = 300)
 
 ### Figure 4: Regen ####
-d.nra <- read_xlsx(path = "data/nra_data.xlsx",sheet = 1)
+d.nra <- read_xlsx(path = "nra_data.xlsx",sheet = 1)
 
 dat4.tmp <- data.frame()
 for(i in 1:n_distinct(d.nra$plot_name))
@@ -180,25 +165,25 @@ dat4 <-
 comparisons_fig4 <- list( c("ar", "nr"))
 
 fig4 <-
-  cowplot::plot_grid(
+  plot_grid(
     ggplot(data = dat4 %>% filter(response=="instem"),
          aes(y=count,x=regen_type)) +
   geom_violin(aes(fill=plot_type)) +
   geom_jitter(width = 0.03) +
   facet_grid(.~plot_type) + theme_bw() +
-  stat_compare_means(comparisons = comparisons_fig3,method = "t.test",
+  stat_compare_means(comparisons = comparisons_fig4,method = "t.test",
                      paired = F,label = "p.signif") +
   scale_fill_manual(name ="",values = c("grey90","grey60")) +
   guides(fill=F) + xlab("") +
   scale_x_discrete(labels = c("Planted saplings (AR)","Natural regeneration (NR)")) +
   ylab("Number of saplings \n(<10cm gbh & taller than 30cm)") +
   coord_flip(),
-  ggplot(data = dat3 %>% filter(response=="insp"),
+  ggplot(data = dat4 %>% filter(response=="insp"),
          aes(y=count,x=regen_type)) +
     geom_violin(aes(fill=plot_type)) +
     geom_jitter(width = 0.03) +
     facet_grid(.~plot_type) + theme_bw() +
-    stat_compare_means(comparisons = comparisons_fig3,method = "t.test",
+    stat_compare_means(comparisons = comparisons_fig4,method = "t.test",
                        paired = F,label = "p.signif") +
     scale_fill_manual(name ="",values = c("grey90","grey60")) +
     guides(fill=F) + xlab("") +
