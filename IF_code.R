@@ -17,9 +17,9 @@ for(i in 1:n_distinct(d.lar$plot_ID))
 {
   iplot <- d.lar %>% filter(plot_ID==sort(unique(d.lar$plot_ID))[i]) %>% filter(code!="stump")
   idat2 <-
-    c(instem = nrow(iplot),
+    c(instem = nrow(iplot) * (1/0.49), # scaled to 1 ha
       # ieH = diversity(x = iplot %>% pull(code) %>% table(),index = "shannon") %>% exp(),
-      insp = n_distinct(iplot$code))
+      insp = n_distinct(iplot$code) * (1/0.49)) # scaled to 1 ha
 
   dat2.tmp <- bind_rows(dat2.tmp,idat2)
 }
@@ -35,7 +35,7 @@ comparisons_fig2 <- list( c("TL", "OL_far"), #c("TL", "OL_near"),
 
 commongg_fig2 <- list(
   stat_compare_means(comparisons = comparisons_fig2,method = "t.test",
-                          paired = F,label = "p.signif", size = 3.5),
+                          paired = F,label = "p.format", size = 3.5),
   scale_fill_manual(name ="",values = c("grey90","grey60")),
   scale_x_discrete(labels=c("unlogged"," old policy (1990s)","new policy (2007-14)",
                             "old & new policy (2007-14 & 1990s)")),
@@ -48,18 +48,18 @@ fig2 <-
          aes(y=instem,x=treatment)) +
     geom_violin(aes(fill=forest_type)) +
     geom_jitter(width = 0.03,size=0.8) + facet_wrap(.~forest_type,nrow = 2) +
-    ylab("Tree density (trees/0.49ha)") + commongg_fig2,
+    ylab("Tree density (trees/ha)") + commongg_fig2,
 
   ggplot(data = dat2,
          aes(y=insp,x=treatment)) +
     geom_violin(aes(fill=forest_type)) +
     geom_jitter(width = 0.03,size=0.8) + facet_wrap(.~forest_type,nrow = 2) +
-    ylab("Species richness (species/0.49ha)") + commongg_fig2 +
+    ylab("Species richness (species/ha)") + commongg_fig2 +
     theme(axis.text.y = element_blank()),
   rel_widths = c(1.85,1),
   ncol = 2)
 
-# ggsave(plot = fig2,filename = "figure2.png",device = "png",width = 20,height = 13,units = "cm",dpi = 300)
+ggsave(plot = fig2,filename = "figure2.png",device = "png",width = 24,height = 13,units = "cm",dpi = 300)
 
 ### Figure 3: Rank-abundance curves #####
 
@@ -70,42 +70,42 @@ d.lar <- read_csv(file = "plotdata_large.csv")
 
 d.rac_TL.e <- d.lar %>% filter(treatment=="TL",forest_type=="evergreen",code!="stump") %>%
   group_by(treatment,forest_type,species_ID) %>% summarise(nstem = n()) %>%
-  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = nstem/1.5,
+  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = (nstem/1.5)*(1/0.49),
                              counter = row_number(), cstemperc = cstem/max(cstem))
 
 d.rac_OLnear.e <- d.lar %>% filter(treatment=="OL_near",forest_type=="evergreen",code!="stump") %>%
   group_by(treatment,forest_type,species_ID) %>% summarise(nstem = n()) %>%
-  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = nstem/2.17,
+  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = (nstem/2.17)*(1/0.49),
                              counter = row_number(), cstemperc = cstem/max(cstem))
 
 d.rac_OLfar.e <- d.lar %>% filter(treatment=="OL_far",forest_type=="evergreen",code!="stump") %>%
   group_by(treatment,forest_type,species_ID) %>% summarise(nstem = n()) %>%
-  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = nstem/1,
+  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = (nstem/1)*(1/0.49),
                              counter = row_number(), cstemperc = cstem/max(cstem))
 
 d.rac_baseline.e <- d.lar %>% filter(treatment=="baseline",forest_type=="evergreen",code!="stump") %>%
   group_by(treatment,forest_type,species_ID) %>% summarise(nstem = n()) %>%
-  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = nstem/1,
+  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = (nstem/1)*(1/0.49),
                              counter = row_number(), cstemperc = cstem/max(cstem))
 
 d.rac_TL.d <- d.lar %>% filter(treatment=="TL",forest_type=="deciduous",code!="stump") %>%
   group_by(treatment,forest_type,species_ID) %>% summarise(nstem = n()) %>%
-  arrange(-nstem) %>% mutate(cstem = cumsum(nstem), scaled_nstem = nstem/2,
+  arrange(-nstem) %>% mutate(cstem = cumsum(nstem), scaled_nstem = (nstem/2)*(1/0.49),
                              counter = row_number(), cstemperc = cstem/max(cstem))
 
 d.rac_OLnear.d <- d.lar %>% filter(treatment=="OL_near",forest_type=="deciduous",code!="stump") %>%
   group_by(treatment,forest_type,species_ID) %>% summarise(nstem = n()) %>%
-  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = nstem/3,
+  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = (nstem/3)*(1/0.49),
                              counter = row_number(), cstemperc = cstem/max(cstem))
 
 d.rac_OLfar.d <- d.lar %>% filter(treatment=="OL_far",forest_type=="deciduous",code!="stump") %>%
   group_by(treatment,forest_type,species_ID) %>% summarise(nstem = n()) %>%
-  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = nstem/1,
+  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = (nstem/1)*(1/0.49),
                              counter = row_number(), cstemperc = cstem/max(cstem))
 
 d.rac_baseline.d <- d.lar %>% filter(treatment=="baseline",forest_type=="deciduous",code!="stump") %>%
   group_by(treatment,forest_type,species_ID) %>% summarise(nstem = n()) %>%
-  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = nstem/1,
+  arrange(-nstem) %>% mutate(cstem = cumsum(nstem),scaled_nstem = (nstem/1)*(1/0.49),
                              counter = row_number(), cstemperc = cstem/max(cstem))
 
 treatment.labs <- c("unlogged","old policy (1990s)","new policy (2007-14)", "both (2007-14 & 1990s)")
@@ -143,8 +143,6 @@ specialgg_fig3_evergreenboth <- list(geom_line(alpha = 0.4),
                             panel.spacing = unit(0.1,"lines")),
                       coord_cartesian(clip = "off"))
 
-
-
 fig3 <-
   plot_grid(
     ggplot(data = d.rac_TL.d, aes(y = scaled_nstem,x=counter)) + commongg_fig3,
@@ -158,199 +156,76 @@ fig3 <-
 
     nrow = 2)
 
-# ggsave(plot = fig3,filename = "figure3.png",device = "png",width = 21,height = 12,units = "cm",dpi = 300)
+ggsave(plot = fig3,filename = "figure3.png",device = "png",width = 21,height = 12,units = "cm",dpi = 300)
 
 ### Figure 4: Regen ####
-d.nra <- read_xlsx(path = "nra_data.xlsx",sheet = 1)
 
-dat4.tmp <- data.frame()
+d.nra <- read_xlsx(path = "nra_data.xlsx",sheet = 1)
+d.treecode <- read_csv("treecodes.csv")
+d.nra_fin <-
+  left_join(x = d.nra,
+            y = d.treecode %>% select(code_new,species_ID,tmp_phenology),
+            by = c("species"="code_new"))
+
+n_unknown_stems <-
+  d.nra_fin[which(is.na(d.nra_fin$tmp_phenology)),] %>%
+  mutate(unknown_nos = nra_sure+natural+unsure+nra_mostly) %>%
+  pull(unknown_nos) %>% sum()
+
+d.nra_fin <- d.nra_fin %>% filter(species!="uid")
+nra_plotlist <- sort(unique(d.nra$plot_name))
+
+dat4.tmp <- tibble()
 for(i in 1:n_distinct(d.nra$plot_name))
 {
-  iplot <- d.nra %>% filter(plot_name == sort(unique(d.nra$plot_name))[i])
+  iplot <- d.nra_fin %>% filter(plot_name == nra_plotlist[i])
+  iplot_E <- iplot %>% filter(tmp_phenology=="E")
+  iplot_D <- iplot %>% filter(tmp_phenology=="D")
   idat3 <-
-    c(instem_ar = sum(iplot$nra_sure) + sum(iplot$nra_mostly) + sum(iplot$unsure),
-      instem_nr = sum(iplot$natural),
-      insp_ar = iplot %>% filter(nra_sure>0 | unsure>0 | nra_mostly >0) %>% pull(species) %>% n_distinct(),
-      insp_nr = iplot %>% filter(natural>0) %>% pull(species) %>% n_distinct())
+    c(#instem_ar = sum(iplot$nra_sure) + sum(iplot$nra_mostly) + sum(iplot$unsure),
+      #instem_nr = sum(iplot$natural),
+      #insp_ar = iplot %>% filter(nra_sure>0 | unsure>0 | nra_mostly >0) %>% pull(species) %>% n_distinct(),
+      #insp_nr = iplot %>% filter(natural>0) %>% pull(species) %>% n_distinct(),
+      instemevergreen_ar = sum(iplot_E$nra_sure) + sum(iplot_E$nra_mostly) + sum(iplot_E$unsure),
+      instemdeciduous_ar = sum(iplot_D$nra_sure) + sum(iplot_D$nra_mostly) + sum(iplot_D$unsure),
+      instemevergreen_nr = sum(iplot_E$natural),
+      instemdeciduous_nr = sum(iplot_D$natural))
+
   dat4.tmp <- bind_rows(dat4.tmp,idat3)
 }
 
 dat4 <-
   dat4.tmp %>%
-  mutate(plot_name = sort(unique(d.nra$plot_name))) %>%
-  right_join(x = .,y = d.nra %>%
-               select(plot_name,plot_type) %>% distinct()) %>%
+  mutate(plot_name = nra_plotlist) %>%
+  full_join(x = d.nra %>% select(plot_name,plot_type) %>% distinct(),
+            y = .) %>%
   pivot_longer(cols = c(-plot_name,-plot_type),values_to = "count") %>%
   separate(col = "name",into = c("response","regen_type"),sep = "_",remove = T)
 
 comparisons_fig4 <- list( c("ar", "nr"))
 
+nra.labs_resp <- c("deciduous saplings in","evergreen saplings in")
+names(nra.labs_resp) <- c("instemdeciduous","instemevergreen")
+
+nra.labs_ftype <- c("deciduous patches","evergreen patches")
+names(nra.labs_ftype) <- c("deciduous","evergreen")
+
 fig4 <-
-  plot_grid(
-    ggplot(data = dat4 %>% filter(response=="instem"),
+ggplot(data = dat4 %>% filter(response %in% c("instemevergreen","instemdeciduous")),
          aes(y=count,x=regen_type)) +
-  geom_violin(aes(fill=plot_type)) +
-  geom_jitter(width = 0.03) +
-  facet_grid(.~plot_type) + theme_bw() +
-  stat_compare_means(comparisons = comparisons_fig4,method = "t.test",
-                     paired = F,label = "p.signif") +
-  scale_fill_manual(name ="",values = c("grey90","grey60")) +
+      geom_boxplot(aes(fill=response)) +
+      facet_grid(.~response + plot_type,
+                 labeller = labeller(response = nra.labs_resp,
+                                     plot_type = nra.labs_ftype),
+                 scales = "free") +
+  theme_bw() + scale_fill_manual(name ="",values = c("grey90","grey60")) +
   guides(fill=F) + xlab("") +
-  scale_x_discrete(labels = c("Planted saplings (AR)","Natural regeneration (NR)")) +
-  ylab("Number of saplings \n(<10cm gbh & taller than 30cm)") +
-  coord_flip(),
-  ggplot(data = dat4 %>% filter(response=="insp"),
-         aes(y=count,x=regen_type)) +
-    geom_violin(aes(fill=plot_type)) +
-    geom_jitter(width = 0.03) +
-    facet_grid(.~plot_type) + theme_bw() +
-    stat_compare_means(comparisons = comparisons_fig4,method = "t.test",
-                       paired = F,label = "p.signif") +
-    scale_fill_manual(name ="",values = c("grey90","grey60")) +
-    guides(fill=F) + xlab("") +
-    scale_x_discrete(labels = c("Planted saplings (AR)","Natural regeneration (NR)")) +
-    ylab("Species richness of saplings\n(<10cm gbh & taller than 30cm)") +
-    coord_flip(),
-  nrow = 2)
+  scale_x_discrete(labels = c("Planted \n saplings \n(AR)",
+                              "Natural \n regeneration \n(NR)")) +
+  ylab("Number of saplings \n(<10cm girth & >30cm in height)") +
+stat_compare_means(comparisons = comparisons_fig4,method = "t.test",
+                   paired = F,label = after_stat("p.format"))
 
-# ggsave(plot = fig4,filename = "figure4.png",device = "png",width = 20,height = 14,units = "cm",dpi = 300)
-
-##### TRIAL - NMDS plots
-
-library(vegan)
-
-### large tree NMDS
-
-nmds_lar1 <-
-  d.lar %>%
-  group_by(code,forest_type,treatment,plot_ID) %>% summarize(count = n()) %>%
-  reshape2::dcast(formula = code ~ plot_ID,fun.aggregate = sum,value.var = "count") %>%
-  column_to_rownames("code") %>%
-  metaMDS(comm = .,distance = "bray",k = 2,autotransform = TRUE,plot = F)
-
-nmds_lar2 <-
-  bind_rows(
-nmds_lar1$points[,c("MDS1","MDS2")] %>%
-  as.data.frame() %>% rownames_to_column("ID_column") %>% mutate(dtype = "species"),
-nmds_lar1$species[,c("MDS1","MDS2")] %>%
-  as.data.frame() %>% rownames_to_column("ID_column") %>% mutate(dtype = "plots")) %>%
-  left_join(x = .,y= d.lar %>% select(treatment,forest_type,plot_ID) %>% distinct(),
-            by = c("ID_column"="plot_ID"))
-
-plot_nmds_large_all <-
-ggplot(data = nmds_lar2,
-       aes(y=MDS2,x=MDS1,shape=dtype,colour=treatment)) +
-  geom_point() + ggrepel::geom_text_repel(aes(label=ifelse(dtype=="species",ID_column,""))) +
-  scale_colour_manual(name="",values=c("blue","forestgreen","yellow","grey30")) +
-  theme_bw() + theme(legend.position = "top") +
-  coord_equal()
-
-dom_sp <-
-  d.lar %>% group_by(treatment,forest_type,code) %>% summarize(nstem = n()) %>%
-  group_split(.keep = "code") %>% # 8 groups, 4 logging treatments x 2 forest type
-  map(.f = function(x) #  in each group, find top 50% species
-    x %>% arrange(-nstem) %>% ungroup() %>%
-      mutate(csum = cumsum(nstem),csum_perc = csum/sum(nstem)) %>%
-      filter(csum_perc <=0.5) %>% pull(code)) %>%
-  unlist() %>% unique()
-
-plot_nmds_large_dom <-
-  ggplot(data = nmds_lar2,
-         aes(y=MDS2,x=MDS1,shape=dtype,colour=treatment)) +
-  geom_point() + ggrepel::geom_text_repel(aes(label=ifelse(dtype=="species" & ID_column %in% dom_sp,
-                                                           ID_column,""))) +
-  scale_colour_manual(name="",values=c("blue","forestgreen","yellow","grey30")) +
-  theme_bw() + theme(legend.position = "top") +
-  coord_equal()
-
-### NRA NMDS
-
-nmds_nra0 <-
-  d.nra %>%
-  mutate(tot_ar = nra_sure + nra_mostly + unsure,
-         tot_nr = natural) %>%
-  select(plot_name,plot_type,species,tot_ar,tot_nr) %>%
-  pivot_longer(cols = c(tot_ar,tot_nr),names_to = "regeneration_type",values_to = "counts")
-
-nmds_nra1 <-
-  nmds_nra0 %>%
-  reshape2::dcast(formula = species ~ plot_name,fun.aggregate = sum,value.var = "counts") %>%
-  column_to_rownames("species") %>%
-  metaMDS(comm = .,distance = "bray",k = 2,autotransform = TRUE,plot = F,)
-
-nmds_nra2 <-
-  bind_rows(
-  nmds_nra1$points[,c("MDS1","MDS2")] %>%
-      as.data.frame() %>% rownames_to_column("ID_column") %>% mutate(dtype = "species"),
-  nmds_nra1$species[,c("MDS1","MDS2")] %>%
-  as.data.frame() %>% rownames_to_column("ID_column") %>% mutate(dtype = "plots")) %>%
-  left_join(x = .,y= nmds_nra0 %>% select(plot_type,plot_name) %>% distinct(),
-            by = c("ID_column"="plot_name"))
-
-plot_nmds_nra_all <-
-  ggplot(data = nmds_nra2,
-         aes(y=MDS2,x=MDS1,shape=dtype,colour = plot_type)) +
-  geom_point() + ggrepel::geom_text_repel(aes(label=ifelse(dtype=="species",ID_column,""))) +
-  theme_bw() + theme(legend.position = "top") +
-  coord_equal()
-
-# AR
-
-nmds_nra1 <-
-  nmds_nra0 %>% filter(regeneration_type=="tot_ar",counts>0) %>%
-  reshape2::dcast(formula = species ~ plot_name,
-                  fun.aggregate = sum,value.var = "counts") %>%
-  column_to_rownames("species") %>%
-  metaMDS(comm = ., distance = "bray", k = 2,autotransform = TRUE, plot = F)
-
-nmds_nra2 <-
-  bind_rows(
-    nmds_nra1$points[,c("MDS1","MDS2")] %>%
-      as.data.frame() %>% rownames_to_column("ID_column") %>% mutate(dtype = "species"),
-    nmds_nra1$species[,c("MDS1","MDS2")] %>%
-      as.data.frame() %>% rownames_to_column("ID_column") %>% mutate(dtype = "plots")) %>%
-  left_join(x = .,y= nmds_nra0 %>% select(plot_type,plot_name) %>% distinct(),
-            by = c("ID_column"="plot_name"))
-
-plot_nmds_nra_AR <-
-  ggplot(data = nmds_nra2,
-         aes(y=MDS2,x=MDS1,shape=dtype,colour = plot_type)) +
-  geom_point() + ggrepel::geom_text_repel(aes(label=ifelse(dtype=="species",ID_column,""))) +
-  theme_bw() + theme(legend.position = "top") +
-  coord_equal()
-
-# NR
-
-nmds_nra1 <-
-  nmds_nra0 %>% filter(regeneration_type=="tot_nr",counts>0) %>%
-  reshape2::dcast(formula = species ~ plot_name,
-                  fun.aggregate = sum,value.var = "counts") %>%
-  column_to_rownames("species") %>%
-  metaMDS(comm = ., distance = "bray", k = 2,autotransform = TRUE, plot = F)
-
-nmds_nra2 <-
-  bind_rows(
-    nmds_nra1$points[,c("MDS1","MDS2")] %>%
-      as.data.frame() %>% rownames_to_column("ID_column") %>% mutate(dtype = "species"),
-    nmds_nra1$species[,c("MDS1","MDS2")] %>%
-      as.data.frame() %>% rownames_to_column("ID_column") %>% mutate(dtype = "plots")) %>%
-  left_join(x = .,y= nmds_nra0 %>% select(plot_type,plot_name) %>% distinct(),
-            by = c("ID_column"="plot_name"))
-
-plot_nmds_nra_NR <-
-  ggplot(data = nmds_nra2,
-         aes(y=MDS2,x=MDS1,shape=dtype,colour = plot_type)) +
-  geom_point() + ggrepel::geom_text_repel(aes(label=ifelse(dtype=="species",ID_column,""))) +
-  theme_bw() + theme(legend.position = "top") +
-  coord_equal()
-
-ggsave(filename = "nmds_largetrees_all.png",plot = plot_nmds_large_all,device = "png",scale = 1.3,dpi = 300)
-ggsave(filename = "nmds_largetrees_dominants.png",plot = plot_nmds_large_dom,device = "png",scale = 1.3,dpi = 300)
-ggsave(filename = "nmds_nra_together.png",plot = plot_nmds_nra_all,device = "png",scale = 1.3,dpi = 300)
-ggsave(filename = "nmds_nra_sidebyside.png",plot = cowplot::plot_grid(plot_nmds_nra_AR,plot_nmds_nra_NR,nrow = 1),
-       device = "png",scale = 3,dpi = 300)
-
-
-
+ggsave(plot = fig4,filename = "figure4.png",device = "png",width = 22,height = 14,units = "cm",dpi = 300)
 
 
