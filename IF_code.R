@@ -46,13 +46,13 @@ fig2 <-
   plot_grid(
   ggplot(data = dat2,
          aes(y=instem,x=treatment)) +
-    geom_violin(aes(fill=forest_type)) +
+    geom_boxplot(aes(fill=forest_type)) +
     geom_jitter(width = 0.03,size=0.8) + facet_wrap(.~forest_type,nrow = 2) +
     ylab("Tree density (trees/ha)") + commongg_fig2,
 
   ggplot(data = dat2,
          aes(y=insp,x=treatment)) +
-    geom_violin(aes(fill=forest_type)) +
+    geom_boxplot(aes(fill=forest_type)) +
     geom_jitter(width = 0.03,size=0.8) + facet_wrap(.~forest_type,nrow = 2) +
     ylab("Species richness (species/ha)") + commongg_fig2 +
     theme(axis.text.y = element_blank()),
@@ -112,7 +112,7 @@ treatment.labs <- c("unlogged","old policy (1990s)","new policy (2007-14)", "bot
 names(treatment.labs) <- c("baseline", "OL_far", "OL_near","TL")
 
 commongg_fig3 <- list(geom_line(alpha = 0.4),
-                 geom_point(alpha = 0.8), ylim(0,35),
+                 geom_point(alpha = 0.8), ylim(0,70),
                  facet_wrap(forest_type ~ treatment,nrow = 2,scales = "free_x",
                             labeller = labeller(treatment = treatment.labs)),
                  ylab(""),xlab(""),theme_bw(),
@@ -128,7 +128,7 @@ commongg_fig3 <- list(geom_line(alpha = 0.4),
                  coord_cartesian(clip = "off"))
 
 specialgg_fig3_evergreenboth <- list(geom_line(alpha = 0.4),
-                      geom_point(alpha = 0.8), ylim(0,35),
+                      geom_point(alpha = 0.8), ylim(0,70),
                       facet_wrap(forest_type ~ treatment,nrow = 2,scales = "free_x",
                                  labeller = labeller(treatment = treatment.labs)),
                       ylab(""),xlab(""),theme_bw(),
@@ -203,6 +203,9 @@ dat4 <-
   separate(col = "name",into = c("response","regen_type"),sep = "_",remove = T)
 
 comparisons_fig4 <- list( c("ar", "nr"))
+
+aov(data = dat4[dat4$regen_type=="ar",],formula = count ~ plot_type:response) %>% summary() # for maintext
+
 
 nra.labs_resp <- c("deciduous saplings in","evergreen saplings in")
 names(nra.labs_resp) <- c("instemdeciduous","instemevergreen")
