@@ -8,7 +8,7 @@ library(ggrepel)
 library(cowplot)
 
 ### Figure 1: see PPT file
-### Figure 2: Large tree density& richness ~ logging-treatment, forest-type ####
+### Figure 2: Large tree density & richness ~ logging-treatment, forest-type ####
 
 d.lar <- read_csv(file = "plotdata_large.csv")
 
@@ -176,23 +176,23 @@ d.nra_fin <- d.nra_fin %>% filter(species!="uid")
 nra_plotlist <- sort(unique(d.nra$plot_name))
 
 dat4.tmp <- tibble()
+
 for(i in 1:n_distinct(d.nra$plot_name))
 {
   iplot <- d.nra_fin %>% filter(plot_name == nra_plotlist[i])
   iplot_E <- iplot %>% filter(tmp_phenology=="E")
   iplot_D <- iplot %>% filter(tmp_phenology=="D")
+  totstem <- sum(iplot$nra_sure) + sum(iplot$nra_mostly) + sum(iplot$unsure) + sum(iplot$natural)
+
   idat3 <-
-    c(#instem_ar = sum(iplot$nra_sure) + sum(iplot$nra_mostly) + sum(iplot$unsure),
-      #instem_nr = sum(iplot$natural),
-      #insp_ar = iplot %>% filter(nra_sure>0 | unsure>0 | nra_mostly >0) %>% pull(species) %>% n_distinct(),
-      #insp_nr = iplot %>% filter(natural>0) %>% pull(species) %>% n_distinct(),
-      instemevergreen_ar = sum(iplot_E$nra_sure) + sum(iplot_E$nra_mostly) + sum(iplot_E$unsure),
-      instemdeciduous_ar = sum(iplot_D$nra_sure) + sum(iplot_D$nra_mostly) + sum(iplot_D$unsure),
-      instemevergreen_nr = sum(iplot_E$natural),
-      instemdeciduous_nr = sum(iplot_D$natural))
+    c(instemevergreen_ar <- (sum(iplot_E$nra_sure) + sum(iplot_E$nra_mostly) + sum(iplot_E$unsure))/totstem,
+      instemdeciduous_ar <- (sum(iplot_D$nra_sure) + sum(iplot_D$nra_mostly) + sum(iplot_D$unsure))/totstem,
+      instemevergreen_nr <- (sum(iplot_E$natural)/totstem),
+      instemdeciduous_nr <- (sum(iplot_D$natural)/totstem))
 
   dat4.tmp <- bind_rows(dat4.tmp,idat3)
 }
+
 
 dat4 <-
   dat4.tmp %>%
@@ -200,7 +200,7 @@ dat4 <-
   full_join(x = d.nra %>% select(plot_name,plot_type) %>% distinct(),
             y = .) %>%
   pivot_longer(cols = c(-plot_name,-plot_type),values_to = "count") %>%
-  separate(col = "name",into = c("response","regen_type"),sep = "_",remove = T)
+    separate(col = "name",into = c("response","regen_type"),sep = "_",remove = T)
 
 comparisons_fig4 <- list( c("ar", "nr"))
 
